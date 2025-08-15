@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Debug Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        textarea { height: 100px; }
+        button { background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; margin-top: 20px; border-radius: 4px; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        pre { white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Diet Planner API Debug Tool</h1>
+        <p>Use this tool to test API calls and debug dietary restriction issues.</p>
+
+        <form id="testForm">
+            <div class="form-group">
+                <label for="allergies">Food Allergies/Intolerances:</label>
+                <input type="text" id="allergies" placeholder="e.g., gluten, non-veg" value="gluten, non-veg">
+            </div>
+
+            <div class="form-group">
+                <label for="foodPreferences">Dietary Preferences & Restrictions:</label>
+                <input type="text" id="foodPreferences" placeholder="e.g., vegetarian, vegan" value="">
+            </div>
+
+            <div class="form-group">
+                <label for="goal">Goal:</label>
+                <select id="goal">
+                    <option value="weight-loss">Weight Loss</option>
+                    <option value="muscle-gain">Muscle Gain</option>
+                    <option value="maintenance">Maintenance</option>
+                </select>
+            </div>
+
+            <button type="submit">🚀 Test API Call</button>
+        </form>
+
+        <div id="result" class="result" style="display: none;">
+            <h3>Results:</h3>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultContent.innerHTML = '<p>⏳ Making API call...</p>';
+
+            const allergies = document.getElementById('allergies').value;
+            const foodPreferences = document.getElementById('foodPreferences').value;
+            const goal = document.getElementById('goal').value;
+
+            const testData = {
+                user_id: `test-user-${Date.now()}`,
+                goal: goal,
+                dietary_restrictions: foodPreferences,
+                allergies: allergies,
+                additional_notes: `Plan Duration: 7 days. IMPORTANT: Dietary Preferences/Restrictions: ${foodPreferences || "None specified"} Medical Allergies: ${allergies || "None"} Generated at: ${new Date().toISOString()}`,
+                user_info: {
+                    age: "30",
+                    gender: "Male",
+                    height: "175",
+                    weight: "75",
+                    activity_level: "Moderate",
+                    goals: goal.replace('-', ' '),
+                    medical_conditions: "None",
+                    medications: "None",
+                    allergies: allergies,
+                    food_preferences: foodPreferences || "No specific preferences",
+                    cooking_ability: "Intermediate",
+                    budget: "Medium",
+                    cultural_factors: "None"
+                }
+            };
+
+            console.log('Sending API request:', testData);
+
+            try {
+                const response = await fetch('http://localhost:8000/api/generate-plan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('API response:', data);
+
+                let resultHtml = `
+                    <div class="success">
+                        <h4>✅ API Call Successful!</h4>
+                        <p><strong>📊 Data Sent:</strong></p>
+                        <pre>Allergies: ${allergies}
+Dietary Restrictions: ${foodPreferences}
+Goal: ${goal}</pre>
+                        
+                        <p><strong>🤖 AI Response Preview:</strong></p>
+                        <pre>${data.plan?.raw?.substring(0, 800) || data.plan?.substring(0, 800) || 'No plan content found'}...</pre>
+                        
+                        <p><strong>🔍 Compliance Check:</strong></p>
+                        <ul>
+                `;
+
+                const planText = data.plan?.raw || data.plan || '';
+                const lowerPlan = planText.toLowerCase();
+
+                // Check for compliance
+                if (allergies.toLowerCase().includes('gluten')) {
+                    const hasGluten = lowerPlan.includes('wheat') || lowerPlan.includes('bread') || lowerPlan.includes('pasta') || lowerPlan.includes('barley') || lowerPlan.includes('rye');
+                    resultHtml += `<li>Gluten-Free: ${hasGluten ? '❌ FAILED - Contains gluten items' : '✅ PASSED - No gluten detected'}</li>`;
+                }
+
+                if (allergies.toLowerCase().includes('non-veg') || allergies.toLowerCase().includes('meat')) {
+                    const hasMeat = lowerPlan.includes('chicken') || lowerPlan.includes('beef') || lowerPlan.includes('fish') || lowerPlan.includes('meat') || lowerPlan.includes('pork');
+                    resultHtml += `<li>Vegetarian: ${hasMeat ? '❌ FAILED - Contains meat/fish' : '✅ PASSED - No meat detected'}</li>`;
+                }
+
+                resultHtml += `
+                        </ul>
+                        <details>
+                            <summary>📄 Full API Response (click to expand)</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+
+                resultDiv.className = 'result success';
+                resultContent.innerHTML = resultHtml;
+
+            } catch (error) {
+                console.error('API error:', error);
+                resultDiv.className = 'result error';
+                resultContent.innerHTML = `
+                    <div class="error">
+                        <h4>❌ API Call Failed</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>🔧 Troubleshooting:</strong></p>
+                        <ul>
+                            <li>Make sure the backend is running on port 8000</li>
+                            <li>Check that the FastAPI server is running (not Flask)</li>
+                            <li>Verify CORS settings if needed</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

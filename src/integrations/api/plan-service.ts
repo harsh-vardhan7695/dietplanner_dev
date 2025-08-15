@@ -159,6 +159,9 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
             },
             body: JSON.stringify(planData),
           });
@@ -178,6 +181,10 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
   
           const data = await response.json();
           console.log('API Response:', JSON.stringify(data, null, 2));
+          console.log('📊 DIETARY RESTRICTIONS CHECK:');
+          console.log('🥗 Allergies sent:', planData.allergies);
+          console.log('🚫 Dietary restrictions sent:', planData.dietary_restrictions);
+          console.log('📝 Additional notes sent:', planData.additional_notes);
           
           // Extract the actual plan content from the complex response structure
           let planContent = '';
@@ -239,13 +246,14 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
   
         // Create the plan request
         const planRequest: PlanRequest = {
-          user_id: userId,
+          user_id: `${userId}-${Date.now()}`, // Add timestamp to force fresh request
           goal: Array.isArray(userData.goals) ? userData.goals[0] : "general-health",
           dietary_restrictions: userData.foodPreferences || "",
           allergies: userData.allergies || "",
           additional_notes: `Plan Duration: ${userData.planDuration || 7} days. 
             IMPORTANT: Dietary Preferences/Restrictions: ${userData.foodPreferences || "None specified"}
-            Medical Allergies: ${userData.allergies || "None"}`,
+            Medical Allergies: ${userData.allergies || "None"}
+            Generated at: ${new Date().toISOString()}`,
           user_info: userInfo
         };
   
