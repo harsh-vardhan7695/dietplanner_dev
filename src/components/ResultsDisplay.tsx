@@ -310,12 +310,21 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
         try {
           const userData = JSON.parse(savedUserData);
           
+          // Clear any previous plan data to force fresh API call
+          setParsedSections({
+            nutritionSection: '',
+            mealSection: '',
+            grocerySection: '',
+            additionalSections: ''
+          });
+          
           // Import the PlanService
           const { PlanService } = await import('@/integrations/api/plan-service');
           
-          // Make the API call
-          console.log("Making API call with user data:", userData);
-          const response = await PlanService.generateHealthPlan(userData, userId);
+          // Make the API call with timestamp to ensure fresh request
+          console.log("🚀 Making FRESH API call with user data:", userData);
+          console.log("🕐 Request timestamp:", new Date().toISOString());
+          const response = await PlanService.generateHealthPlan(userData, `${userId}-${Date.now()}`);
           
           console.log("Received API response:", response);
           
@@ -1495,7 +1504,18 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
         onOpenChange={setShowRatingDialog} 
       />
 
-      <div className="text-center mb-6">
+      <div className="text-center mb-6 space-x-4">
+        <Button
+          variant="outline"
+          onClick={() => {
+            console.log("🔄 Force refreshing plan...");
+            localStorage.removeItem('nutritionPlan');
+            generatePlan();
+          }}
+          className="mr-4"
+        >
+          🔄 Generate Fresh Plan
+        </Button>
         <Button
           variant="default"
           size="lg"
