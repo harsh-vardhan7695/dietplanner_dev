@@ -126,26 +126,45 @@ def create_tasks(nutritionist, medical_specialist, diet_planner, user_info):
     
     # Second task: Analyze medical conditions and adjust nutritional recommendations
     medical_analysis = Task(
-        description=f'''Analyze: Medical: {user_info.medical_conditions}, Medications: {user_info.medications}, 
-            Allergies: {user_info.allergies}. 
+        description=f'''Analyze Medical Information: 
+            - Medical Conditions: {user_info.medical_conditions}
+            - Medications: {user_info.medications} 
+            - Medical Allergies/Intolerances: {user_info.allergies}
+            
+            IMPORTANT: Treat allergies as STRICT medical restrictions - completely EXCLUDE these foods.
+            
             Provide: 1) Nutrients to adjust based on conditions, 2) Food-medication interactions, 
-            3) Potential deficiencies, 4) Beneficial foods, 5) Foods to avoid.''',
+            3) Potential deficiencies, 4) Beneficial foods, 5) Foods to completely AVOID due to medical reasons.''',
         agent=medical_specialist,
         context=[demographics_research],
-        expected_output="Medical nutrition therapy adjustments"
+        expected_output="Medical nutrition therapy adjustments with strict allergy exclusions"
     )
     
     # Third task: Create the comprehensive diet plan
     diet_plan = Task(
-        description=f'''Create diet plan for: Preferences: {user_info.food_preferences}, 
-            Cooking: {user_info.cooking_ability}, Budget: {user_info.budget}, 
-            Cultural: {user_info.cultural_factors}. 
+        description=f'''Create a comprehensive diet plan with these requirements:
+            
+            DIETARY PREFERENCES & RESTRICTIONS: {user_info.food_preferences}
+            COOKING ABILITY: {user_info.cooking_ability}
+            BUDGET: {user_info.budget}
+            CULTURAL FACTORS: {user_info.cultural_factors}
+            
+            CRITICAL REQUIREMENTS:
+            1. STRICTLY FOLLOW all dietary preferences and restrictions mentioned above
+            2. If "vegetarian", "vegan", "no non-veg", "no meat" is mentioned - EXCLUDE ALL animal products
+            3. If specific foods are mentioned to avoid - COMPLETELY EXCLUDE them
+            4. Respect cultural and religious dietary laws
+            5. Stay within the specified budget range
+            6. Match the cooking complexity to user's ability
+            
             Include: 1) Daily/weekly foods with portions, 2) 7-day meal plan with recipes, 
             3) Grocery list, 4) Meal prep tips, 5) Eating out guidelines, 
-            6) Supplement recommendations if needed, 7) Hydration plan.''',
+            6) Supplement recommendations if needed, 7) Hydration plan.
+            
+            DOUBLE-CHECK: Ensure no foods violate the dietary preferences/restrictions.''',
         agent=diet_planner,
         context=[demographics_research, medical_analysis],
-        expected_output="Personalized nutrition plan"
+        expected_output="Personalized nutrition plan strictly following dietary preferences"
     )
     
     return [demographics_research, medical_analysis, diet_plan]

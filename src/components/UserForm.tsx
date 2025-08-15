@@ -301,6 +301,9 @@ const UserForm: React.FC<UserFormProps> = ({
                           </Button>
                         ))}
                       </div>
+                      <p className="text-xs text-muted-foreground">
+                        Select your main nutrition and health goals. These will guide your meal plan recommendations.
+                      </p>
                     </div>
 
                     <div className="flex justify-end pt-4">
@@ -343,14 +346,17 @@ const UserForm: React.FC<UserFormProps> = ({
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="allergies">Food Allergies/Intolerances (separate with commas)</Label>
+                        <Label htmlFor="allergies">Medical Food Allergies/Intolerances (separate with commas)</Label>
                         <Textarea
                           id="allergies"
-                          placeholder="E.g., Lactose, Gluten, Shellfish, Peanuts..."
+                          placeholder="E.g., Lactose intolerance, Gluten sensitivity, Shellfish allergy, Peanuts..."
                           value={userData.allergies}
                           onChange={(e) => handleChange('allergies', e.target.value)}
                           className="focus-ring min-h-[100px]"
                         />
+                        <p className="text-xs text-muted-foreground">
+                          Only enter actual medical allergies or intolerances. Use "Food Preferences" below for dietary choices like vegetarian/non-vegetarian.
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -363,14 +369,17 @@ const UserForm: React.FC<UserFormProps> = ({
                     
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="foodPreferences">Food Preferences & Dislikes</Label>
+                        <Label htmlFor="foodPreferences">Dietary Preferences & Restrictions</Label>
                         <Textarea
                           id="foodPreferences"
-                          placeholder="E.g., Prefer plant-based, dislike seafood..."
+                          placeholder="E.g., Vegetarian, Vegan, No red meat, No seafood, Keto, Mediterranean, Halal, Kosher..."
                           value={userData.foodPreferences}
                           onChange={(e) => handleChange('foodPreferences', e.target.value)}
                           className="focus-ring min-h-[100px]"
                         />
+                        <p className="text-xs text-muted-foreground">
+                          Enter your dietary choices, restrictions, and food preferences. This is where you specify if you want vegetarian, vegan, no non-veg, etc.
+                        </p>
                       </div>
                       
                       <div className="space-y-2">

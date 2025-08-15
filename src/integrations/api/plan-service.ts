@@ -31,7 +31,7 @@ interface UserInfo {
   }
   
   // The base URL of the backend API
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
   
   // Log the API base URL at load time for debugging
   console.log('API_BASE_URL configured as:', API_BASE_URL);
@@ -243,7 +243,9 @@ interface UserInfo {
           goal: Array.isArray(userData.goals) ? userData.goals[0] : "general-health",
           dietary_restrictions: userData.foodPreferences || "",
           allergies: userData.allergies || "",
-          additional_notes: `Plan Duration: ${userData.planDuration || 7} days`,
+          additional_notes: `Plan Duration: ${userData.planDuration || 7} days. 
+            IMPORTANT: Dietary Preferences/Restrictions: ${userData.foodPreferences || "None specified"}
+            Medical Allergies: ${userData.allergies || "None"}`,
           user_info: userInfo
         };
   
